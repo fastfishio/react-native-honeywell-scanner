@@ -101,6 +101,7 @@ public class HoneywellScannerModule extends ReactContextBaseJavaModule implement
                     reader.setProperty(BarcodeReader.PROPERTY_UPC_E_CHECK_DIGIT_TRANSMIT_ENABLED, true);
                     reader.setProperty(BarcodeReader.PROPERTY_POSTAL_2D_PLANET_CHECK_DIGIT_TRANSMIT_ENABLED, true);
                     reader.setProperty(BarcodeReader.PROPERTY_POSTAL_2D_POSTNET_CHECK_DIGIT_TRANSMIT_ENABLED, true);
+                    reader.setProperty(BarcodeReader.PROPERTY_CODE_93_ENABLED, true);
 
                 } catch (Exception e) {}
 

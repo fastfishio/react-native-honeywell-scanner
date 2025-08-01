@@ -1,34 +1,41 @@
-const ReactNative = require('react-native');
-const { NativeModules, DeviceEventEmitter } = ReactNative;
-const HoneywellScanner = NativeModules.HoneywellScanner || {}; // Hacky fallback for iOS
+const { NativeModules, NativeEventEmitter } = require('react-native');
+
+const HoneywellScanner = NativeModules.HoneywellScanner;
+
+const eventEmitter = new NativeEventEmitter(HoneywellScanner);
 
 const allowedEvents = [
   HoneywellScanner.BARCODE_READ_SUCCESS,
   HoneywellScanner.BARCODE_READ_FAIL,
 ];
 
+const listeners = new Map();
+
 /**
- * Listen for available events
- * @param  {String} eventName Name of event one of barcodeReadSuccess, barcodeReadFail
- * @param  {Function} handler Event handler
+ * Listen for barcode scanner events
+ * @param {string} eventName - 'barcodeReadSuccess' or 'barcodeReadFail'
+ * @param {function} handler - Callback function
  */
 HoneywellScanner.on = (eventName, handler) => {
   if (!allowedEvents.includes(eventName)) {
-    throw new Error(`Event name ${eventName} is not a supported event.`);
+    throw new Error(`Event name "${eventName}" is not supported.`);
   }
-  DeviceEventEmitter.addListener(eventName, handler);
+
+  const subscription = eventEmitter.addListener(eventName, handler);
+  listeners.set(handler, subscription);
 };
 
 /**
- * Stop listening for event
- * @param  {String} eventName Name of event one of barcodeReadSuccess, barcodeReadFail
- * @param  {Function} handler Event handler
+ * Stop listening for events
+ * @param {string} eventName
+ * @param {function} handler
  */
 HoneywellScanner.off = (eventName, handler) => {
-  if (!allowedEvents.includes(eventName)) {
-    throw new Error(`Event name ${eventName} is not a supported event.`);
+  const subscription = listeners.get(handler);
+  if (subscription) {
+    subscription.remove();
+    listeners.delete(handler);
   }
-  DeviceEventEmitter.removeListener(eventName, handler);
 };
 
 module.exports = HoneywellScanner;

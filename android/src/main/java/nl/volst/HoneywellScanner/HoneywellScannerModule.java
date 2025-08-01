@@ -92,15 +92,25 @@ public class HoneywellScannerModule extends ReactContextBaseJavaModule implement
             public void onCreated(AidcManager aidcManager) {
                 manager = aidcManager;
                 reader = manager.createBarcodeReader();
-                if(reader != null){
+
+                if (reader != null) {
                     reader.addBarcodeListener(HoneywellScannerModule.this);
+
                     try {
+                        reader.setProperty(BarcodeReader.PROPERTY_DATA_PROCESSOR_LAUNCH_BROWSER, false);
                         reader.claim();
+                        Log.d(TAG, "Scanner claimed successfully");
                         promise.resolve(true);
                     } catch (ScannerUnavailableException e) {
-                        promise.resolve(false);
-                        e.printStackTrace();
+                        Log.e(TAG, "Scanner unavailable: " + e.getMessage());
+                        promise.reject("SCANNER_UNAVAILABLE", "Failed to claim scanner", e);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to initialize scanner: " + e.getMessage());
+                        promise.reject("SCANNER_ERROR", "Failed to initialize scanner", e);
                     }
+                } else {
+                    Log.e(TAG, "BarcodeReader is null");
+                    promise.reject("READER_NULL", "BarcodeReader could not be created");
                 }
             }
         });
@@ -108,17 +118,33 @@ public class HoneywellScannerModule extends ReactContextBaseJavaModule implement
 
     @ReactMethod
     public void stopReader(Promise promise) {
-        if (reader != null) {
-            reader.close();
+        try {
+            if (reader != null) {
+                reader.removeBarcodeListener(this);
+                reader.close();
+                reader = null;
+            }
+
+            if (manager != null) {
+                manager.close();
+                manager = null;
+            }
+
+            Log.d(TAG, "Scanner stopped");
+            promise.resolve(null);
+        } catch (Exception e) {
+            Log.e(TAG, "Error stopping scanner: " + e.getMessage());
+            promise.reject("STOP_ERROR", "Error while stopping scanner", e);
         }
-        if (manager != null) {
-            manager.close();
-        }
-        promise.resolve(null);
     }
 
+    @ReactMethod
+    public void addListener(String eventName) {}
+
+    @ReactMethod
+    public void removeListeners(Integer count) {}
+
     private boolean isCompatible() {
-        // This... is not optimal. Need to find a better way to performantly check whether device has a Honeywell scanner 
         return Build.BRAND.toLowerCase().contains("honeywell");
     }
 

@@ -92,6 +92,7 @@ public class HoneywellScannerModule extends ReactContextBaseJavaModule implement
             public void onCreated(AidcManager aidcManager) {
                 manager = aidcManager;
                 reader = manager.createBarcodeReader();
+                reader.setProperty(BarcodeReader.PROPERTY_CODE_128_ENABLED, true);
                 if(reader != null){
                     reader.addBarcodeListener(HoneywellScannerModule.this);
                     try {

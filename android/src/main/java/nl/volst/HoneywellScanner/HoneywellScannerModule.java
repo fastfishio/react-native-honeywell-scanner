@@ -96,7 +96,10 @@ public class HoneywellScannerModule extends ReactContextBaseJavaModule implement
                 if(reader != null){
                     reader.addBarcodeListener(HoneywellScannerModule.this);
                     try {
+                        // IMPORTANT: Disable browser launch BEFORE claiming the scanner
+                        reader.setProperty(BarcodeReader.PROPERTY_DATA_PROCESSOR_LAUNCH_BROWSER, false);
                         reader.claim();
+                        // Enable barcode symbologies
                         reader.setProperty(BarcodeReader.PROPERTY_CODE_128_ENABLED, true);
                         reader.setProperty(BarcodeReader.PROPERTY_CODE_39_ENABLED, true);
                         reader.setProperty(BarcodeReader.PROPERTY_CODE_39_FULL_ASCII_ENABLED, true);
@@ -113,12 +116,28 @@ public class HoneywellScannerModule extends ReactContextBaseJavaModule implement
     @ReactMethod
     public void stopReader(Promise promise) {
         if (reader != null) {
-            reader.close();
+            reader.removeBarcodeListener(this);
+            reader.release();  // Release the claim first
+            reader.close();    // Then close the reader
+            reader = null;
         }
         if (manager != null) {
             manager.close();
+            manager = null;
         }
         promise.resolve(null);
+    }
+
+    // Required for NativeEventEmitter (RN 0.65+)
+    @ReactMethod
+    public void addListener(String eventName) {
+        // Keep: Required for RN built-in Event Emitter
+    }
+
+    // Required for NativeEventEmitter (RN 0.65+)
+    @ReactMethod
+    public void removeListeners(Integer count) {
+        // Keep: Required for RN built-in Event Emitter
     }
 
     private boolean isCompatible() {

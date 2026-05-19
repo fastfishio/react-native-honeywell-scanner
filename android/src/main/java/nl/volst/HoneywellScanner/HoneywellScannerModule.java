@@ -121,6 +121,15 @@ public class HoneywellScannerModule extends ReactContextBaseJavaModule implement
         promise.resolve(null);
     }
 
+    // Required so RN's NativeEventEmitter doesn't warn on construction (RN 0.65+).
+    @ReactMethod
+    public void addListener(String eventName) {
+    }
+
+    @ReactMethod
+    public void removeListeners(Integer count) {
+    }
+
     private boolean isCompatible() {
         // This... is not optimal. Need to find a better way to performantly check whether device has a Honeywell scanner 
         return Build.BRAND.toLowerCase().contains("honeywell");

@@ -1,40 +1,27 @@
-buildscript {
-    repositories {
-        jcenter()
-        google()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.2'
-    }
-}
-
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    namespace "nl.volst.HoneywellScanner"
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 28
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
         ndk {
-            abiFilters "armeabi-v7a", "x86"
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }
     }
 }
 
 repositories {
     mavenCentral()
-    maven {
-        // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
-        url "$rootDir/../node_modules/react-native/android"
-    }
     google()
 }
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation 'com.facebook.react:react-native:+'
+    implementation 'com.facebook.react:react-android'
 }
